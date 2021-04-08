@@ -38,6 +38,14 @@ CZMQNotificationInterface* CZMQNotificationInterface::Create()
     factories["pubrawtx"] = CZMQAbstractNotifier::Create<CZMQPublishRawTransactionNotifier>;
     factories["pubsequence"] = CZMQAbstractNotifier::Create<CZMQPublishSequenceNotifier>;
 
+    factories["pubmempooladded"] = CZMQAbstractNotifier::Create<CZMQPublishMempolAddedNotifier>;
+    factories["pubmempoolremoved"] = CZMQAbstractNotifier::Create<CZMQPublishMempoolRemovedNotifier>;
+    factories["pubchainconnected"] = CZMQAbstractNotifier::Create<CZMQPublishChainConnectedNotifier>;
+    factories["pubmempoolreplaced"] = CZMQAbstractNotifier::Create<CZMQPublishMempolReplacedNotifier>;
+    factories["pubmempoolconfirmed"] = CZMQAbstractNotifier::Create<CZMQPublishMempoolConfirmedNotifier>;
+    factories["pubchaintipchanged"] = CZMQAbstractNotifier::Create<CZMQPublishChainTipChangedNotifier>;
+    factories["pubchainheaderadded"] = CZMQAbstractNotifier::Create<CZMQPublishChainHeaderAddedNotifier>;
+
     std::list<std::unique_ptr<CZMQAbstractNotifier>> notifiers;
     for (const auto& entry : factories)
     {
@@ -137,6 +145,10 @@ void CZMQNotificationInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, co
     TryForEachAndRemoveFailed(notifiers, [pindexNew](CZMQAbstractNotifier* notifier) {
         return notifier->NotifyBlock(pindexNew);
     });
+
+    TryForEachAndRemoveFailed(notifiers, [pindexNew](CZMQAbstractNotifier* notifier) {
+        return notifier->NotifyChainTipChanged(pindexNew);
+    });
 }
 
 void CZMQNotificationInterface::TransactionAddedToMempool(const CTransactionRef& ptx, uint64_t mempool_sequence)
@@ -145,6 +157,24 @@ void CZMQNotificationInterface::TransactionAddedToMempool(const CTransactionRef&
 
     TryForEachAndRemoveFailed(notifiers, [&tx, mempool_sequence](CZMQAbstractNotifier* notifier) {
         return notifier->NotifyTransaction(tx) && notifier->NotifyTransactionAcceptance(tx, mempool_sequence);
+    });
+}
+
+void CZMQNotificationInterface::TransactionAddedToMempoolWithFee(const CTransactionRef& ptx, const CAmount fee)
+{
+    const CTransaction& tx = *ptx;
+
+    TryForEachAndRemoveFailed(notifiers, [&tx, fee](CZMQAbstractNotifier* notifier) {
+        return notifier->NotifyMempoolTransactionAdded(tx, fee);
+    });
+}
+
+void CZMQNotificationInterface::TransactionRemovedFromMempoolWithReason(const CTransactionRef& ptx, const MemPoolRemovalReason reason)
+{
+    const CTransaction& tx = *ptx;
+
+    TryForEachAndRemoveFailed(notifiers, [&tx, reason](CZMQAbstractNotifier* notifier) {
+        return notifier->NotifyMempoolTransactionRemoved(tx, reason);
     });
 }
 
@@ -162,8 +192,16 @@ void CZMQNotificationInterface::BlockConnected(const std::shared_ptr<const CBloc
 {
     for (const CTransactionRef& ptx : pblock->vtx) {
         const CTransaction& tx = *ptx;
+
         TryForEachAndRemoveFailed(notifiers, [&tx](CZMQAbstractNotifier* notifier) {
             return notifier->NotifyTransaction(tx);
+        });
+
+        // do not notify on coinbase tx
+        if (tx.IsCoinBase()) continue;
+
+        TryForEachAndRemoveFailed(notifiers, [&tx, pindexConnected](CZMQAbstractNotifier* notifier) {
+            return notifier->NotifyMempoolTransactionConfirmed(tx, pindexConnected);
         });
     }
 
@@ -185,6 +223,23 @@ void CZMQNotificationInterface::BlockDisconnected(const std::shared_ptr<const CB
     // Next we notify BlockDisconnect listeners for *all* blocks
     TryForEachAndRemoveFailed(notifiers, [pindexDisconnected](CZMQAbstractNotifier* notifier) {
         return notifier->NotifyBlockDisconnect(pindexDisconnected);
+    });
+}
+
+void CZMQNotificationInterface::TransactionReplacedInMempool(const CTransactionRef& replaced, const CAmount replaced_tx_fee, const CTransactionRef& replacement, const CAmount replacement_tx_fee)
+{
+    const CTransaction& replaced_tx = *replaced;
+    const CTransaction& replacement_tx = *replacement;
+
+    TryForEachAndRemoveFailed(notifiers, [replaced_tx, replaced_tx_fee, replacement_tx, replacement_tx_fee](CZMQAbstractNotifier* notifier) {
+        return notifier->NotifyMempoolTransactionReplaced(replaced_tx, replaced_tx_fee, replacement_tx, replacement_tx_fee);
+    });
+}
+
+void CZMQNotificationInterface::HeaderAddedToChain(const CBlockIndex *pindexHeader)
+{
+    TryForEachAndRemoveFailed(notifiers, [pindexHeader](CZMQAbstractNotifier* notifier) {
+        return notifier->NotifyChainHeaderAdded(pindexHeader);
     });
 }
 

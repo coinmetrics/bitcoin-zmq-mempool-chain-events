@@ -500,6 +500,22 @@ void SetupServerArgs(NodeContext& node)
     argsman.AddArg("-zmqpubrawblockhwm=<n>", strprintf("Set publish raw block outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
     argsman.AddArg("-zmqpubrawtxhwm=<n>", strprintf("Set publish raw transaction outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
     argsman.AddArg("-zmqpubsequencehwm=<n>", strprintf("Set publish hash sequence message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+
+    argsman.AddArg("-zmqpubmempooladded=<address>", "Enable publish raw transaction with fee in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempooladdedhwm=<n>", strprintf("Set publish raw transaction with fee outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolremoved=<address>", "Enable publish removed raw transaction with reason in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolremovedhwm=<n>", strprintf("Set publish removed raw transaction with reason outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+
+    argsman.AddArg("-zmqpubchainconnected=<address>", "Enable publish raw block connected in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubchainconnectedhwm=<n>", strprintf("Set publish raw block connected outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolreplaced=<address>", "Enable publish replaced raw transaction in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolreplacedhwm=<n>", strprintf("Set publish replaced raw transaction outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolconfirmed=<address>", "Enable publish confirmed raw transaction in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubmempoolconfirmedhwm=<n>", strprintf("Set publish confirmed raw transaction outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubchaintipchanged=<address>", "Enable publish tip changed events in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubchaintipchangedhwm=<n>", strprintf("Set tip changed outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubchainheaderadded=<address>", "Enable publish header added events in <address>", ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
+    argsman.AddArg("-zmqpubchainheaderaddedhwm=<n>", strprintf("Set header added outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), ArgsManager::ALLOW_ANY, OptionsCategory::ZMQ);
 #else
     hidden_args.emplace_back("-zmqpubhashblock=<address>");
     hidden_args.emplace_back("-zmqpubhashtx=<address>");
@@ -511,6 +527,21 @@ void SetupServerArgs(NodeContext& node)
     hidden_args.emplace_back("-zmqpubrawblockhwm=<n>");
     hidden_args.emplace_back("-zmqpubrawtxhwm=<n>");
     hidden_args.emplace_back("-zmqpubsequencehwm=<n>");
+
+    hidden_args.emplace_back("-zmqpubmempooladded=<address>");
+    hidden_args.emplace_back("-zmqpubmempooladdedhwm=<n>");
+    hidden_args.emplace_back("-zmqpubmempoolremoved=<address>");
+    hidden_args.emplace_back("-zmqpubmempoolremovedhwm=<address>");
+    hidden_args.emplace_back("-zmqpubchainconnected=<address>");
+    hidden_args.emplace_back("-zmqpubchainconnectedhwm=<address>");
+    hidden_args.emplace_back("-zmqpubmempoolreplaced=<address>");
+    hidden_args.emplace_back("-zmqpubmempoolreplacedhwm=<address>");
+    hidden_args.emplace_back("-zmqpubmempoolconfirmed=<address>");
+    hidden_args.emplace_back("-zmqpubmempoolconfirmedhwm=<address>");
+    hidden_args.emplace_back("-zmqpubchaintipchanged=<address>");
+    hidden_args.emplace_back("-zmqpubchaintipchangedhwm=<address>");
+    hidden_args.emplace_back("-zmqpubchainheaderadded=<address>");
+    hidden_args.emplace_back("-zmqpubchainheaderaddedhwm=<address>");
 #endif
 
     argsman.AddArg("-checkblocks=<n>", strprintf("How many blocks to check at startup (default: %u, 0 = all)", DEFAULT_CHECKBLOCKS), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);

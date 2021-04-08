@@ -9,6 +9,9 @@
 #include <primitives/transaction.h> // CTransaction(Ref)
 #include <sync.h>
 
+// ZMCE patch
+#include <txmempool.h>
+
 #include <functional>
 #include <memory>
 
@@ -173,6 +176,34 @@ protected:
      * Notifies listeners that a block which builds directly on our current tip
      * has been received and connected to the headers tree, though not validated yet */
     virtual void NewPoWValidBlock(const CBlockIndex *pindex, const std::shared_ptr<const CBlock>& block) {};
+
+    // ZMCE patch:
+    /**
+     * Notifies listeners of a transaction having been added to mempool and passed the transaction fee.
+     *
+     * Called on a background thread.
+     */
+    virtual void TransactionAddedToMempoolWithFee(const CTransactionRef&, const CAmount) {}
+    /**
+     * Notifies listeners of a transaction leaving mempool and passes the reason.
+     *
+     * Called on a background thread.
+     */
+    virtual void TransactionRemovedFromMempoolWithReason(const CTransactionRef&, const MemPoolRemovalReason) {}
+    /**
+     * Notifies listeners of a transaction being replaced in the mempool and passes
+     * the replaced and replacment transaction as well as their fees paid.
+     *
+     * Called on a background thread.
+     */
+    virtual void TransactionReplacedInMempool(const CTransactionRef&, const CAmount, const CTransactionRef&, const CAmount) {}
+    /**
+     * Notifies listeners when a new header is added to one of the branches of the chain.
+     *
+     * Called on a background thread.
+     */
+    virtual void HeaderAddedToChain(const CBlockIndex *pindexHeader) {}
+
     friend class CMainSignals;
 };
 
@@ -205,6 +236,11 @@ public:
     void ChainStateFlushed(const CBlockLocator &);
     void BlockChecked(const CBlock&, const BlockValidationState&);
     void NewPoWValidBlock(const CBlockIndex *, const std::shared_ptr<const CBlock>&);
+
+    void TransactionAddedToMempoolWithFee(const CTransactionRef &, const CAmount);
+    void TransactionRemovedFromMempoolWithReason(const CTransactionRef &, const MemPoolRemovalReason);
+    void TransactionReplacedInMempool(const CTransactionRef &, const CAmount, const CTransactionRef &, const CAmount);
+    void HeaderAddedToChain(const CBlockIndex *);
 };
 
 CMainSignals& GetMainSignals();

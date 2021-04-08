@@ -254,3 +254,40 @@ void CMainSignals::NewPoWValidBlock(const CBlockIndex *pindex, const std::shared
     LOG_EVENT("%s: block hash=%s", __func__, block->GetHash().ToString());
     m_internals->Iterate([&](CValidationInterface& callbacks) { callbacks.NewPoWValidBlock(pindex, block); });
 }
+
+
+void CMainSignals::TransactionAddedToMempoolWithFee(const CTransactionRef &ptx, const CAmount fee) {
+    auto event = [ptx, fee, this] {
+        m_internals->Iterate([&](CValidationInterface& callbacks) { callbacks.TransactionAddedToMempoolWithFee(ptx, fee); });
+    };
+    ENQUEUE_AND_LOG_EVENT(event, "%s: txid=%s wtxid=%s", __func__,
+                          ptx->GetHash().ToString(),
+                          ptx->GetWitnessHash().ToString());
+}
+
+void CMainSignals::TransactionRemovedFromMempoolWithReason(const CTransactionRef &ptx, const MemPoolRemovalReason reason) {
+    auto event = [ptx, reason, this] {
+        m_internals->Iterate([&](CValidationInterface& callbacks) { callbacks.TransactionRemovedFromMempoolWithReason(ptx, reason); });
+    };
+    ENQUEUE_AND_LOG_EVENT(event, "%s: txid=%s wtxid=%s", __func__,
+                          ptx->GetHash().ToString(),
+                          ptx->GetWitnessHash().ToString());
+}
+
+void CMainSignals::TransactionReplacedInMempool(const CTransactionRef &replaced, const CAmount replaced_tx_fee, const CTransactionRef &replacement, const CAmount replacement_tx_fee) {
+    auto event = [replaced, replaced_tx_fee, replacement, replacement_tx_fee, this] {
+        m_internals->Iterate([&](CValidationInterface& callbacks) { callbacks.TransactionReplacedInMempool(replaced, replaced_tx_fee, replacement, replacement_tx_fee); });
+    };
+    ENQUEUE_AND_LOG_EVENT(event, "%s: replaced_txid=%s replaced_wtxid=%s", __func__,
+                          replaced->GetHash().ToString(),
+                          replaced->GetWitnessHash().ToString());
+}
+
+void CMainSignals::HeaderAddedToChain(const CBlockIndex *pindexHeader) {
+    auto event = [pindexHeader, this] {
+        m_internals->Iterate([&](CValidationInterface& callbacks) { callbacks.HeaderAddedToChain(pindexHeader); });
+    };
+    ENQUEUE_AND_LOG_EVENT(event, "%s: block hash=%s block height=%d", __func__,
+                        pindexHeader->GetBlockHash().ToString(),
+                        pindexHeader->nHeight);
+}

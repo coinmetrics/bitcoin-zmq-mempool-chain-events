@@ -1003,6 +1003,9 @@ bool MemPoolAccept::Finalize(ATMPArgs& args, Workspace& ws)
                 hash.ToString(),
                 FormatMoney(nModifiedFees - nConflictingFees),
                 (int)entry->GetTxSize() - (int)nConflictingSize);
+
+        GetMainSignals().TransactionReplacedInMempool(it->GetSharedTx(), nConflictingFees, ws.m_ptx, ws.m_modified_fees);
+
         if (args.m_replaced_transactions)
             args.m_replaced_transactions->push_back(it->GetSharedTx());
     }
@@ -1052,6 +1055,9 @@ bool MemPoolAccept::AcceptSingleTransaction(const CTransactionRef& ptx, ATMPArgs
     if (!Finalize(args, workspace)) return false;
 
     GetMainSignals().TransactionAddedToMempool(ptx, m_pool.GetAndIncrementSequence());
+
+    if (m_pool.IsLoaded())
+        GetMainSignals().TransactionAddedToMempoolWithFee(ptx, workspace.m_entry->GetFee());
 
     return true;
 }
@@ -3211,6 +3217,10 @@ CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block)
         pindexBestHeader = pindexNew;
 
     setDirtyBlockIndex.insert(pindexNew);
+
+    if (!fImporting && !fReindex) {
+        GetMainSignals().HeaderAddedToChain(pindexNew);
+    }
 
     return pindexNew;
 }
