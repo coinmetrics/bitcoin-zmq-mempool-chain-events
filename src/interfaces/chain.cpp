@@ -80,6 +80,24 @@ public:
         m_notifications->updatedBlockTip();
     }
     void ChainStateFlushed(const CBlockLocator& locator) override { m_notifications->chainStateFlushed(locator); }
+
+    // ZMCE patch:
+    void TransactionAddedToMempoolWithFee(const CTransactionRef& tx, const CAmount fee) override
+    {
+        m_notifications->transactionAddedToMempoolWithFee(tx, fee);
+    }
+    void TransactionRemovedFromMempoolWithReason(const CTransactionRef& tx, const MemPoolRemovalReason reason) override
+    {
+        m_notifications->transactionRemovedFromMempoolWithReason(tx, reason);
+    }
+    void TransactionReplacedInMempool(const CTransactionRef& replaced, const CAmount replaced_tx_fee, const CTransactionRef& replacment, const CAmount replacment_tx_fee) override
+    {
+        m_notifications->transactionReplacedInMempool(replaced, replaced_tx_fee, replacment, replacment_tx_fee);
+    }
+    void HeaderAddedToChain(const CBlockIndex* index) override
+    {
+        m_notifications->headerAddedToChain();
+    }
     std::shared_ptr<Chain::Notifications> m_notifications;
 };
 

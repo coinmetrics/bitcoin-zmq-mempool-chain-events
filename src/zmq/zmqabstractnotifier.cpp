@@ -6,6 +6,8 @@
 
 #include <cassert>
 
+#include <txmempool.h>
+
 const int CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM;
 
 CZMQAbstractNotifier::~CZMQAbstractNotifier()
@@ -39,6 +41,41 @@ bool CZMQAbstractNotifier::NotifyTransactionAcceptance(const CTransaction &/*tra
 }
 
 bool CZMQAbstractNotifier::NotifyTransactionRemoval(const CTransaction &/*transaction*/, uint64_t mempool_sequence)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyMempoolTransactionAdded(const CTransaction &/*transaction*/, const CAmount/*fee*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyMempoolTransactionRemoved(const CTransaction &/*transaction*/, const MemPoolRemovalReason /*reason*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyChainBlockConnected(const CBlockIndex * /*CBlockIndex*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyMempoolTransactionReplaced(const CTransaction &/*replaced*/, const CAmount/*replaced tx fee*/, const CTransaction &/*replacment*/, const CAmount/*replacement tx fee*/)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyMempoolTransactionConfirmed(const CTransaction &/*transaction*/, const CBlockIndex *)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyChainTipChanged(const CBlockIndex *)
+{
+    return true;
+}
+
+bool CZMQAbstractNotifier::NotifyChainHeaderAdded(const CBlockIndex *)
 {
     return true;
 }

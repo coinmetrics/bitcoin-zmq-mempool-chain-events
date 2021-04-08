@@ -19,6 +19,8 @@
 #include <util/time.h>
 #include <validationinterface.h>
 
+#include <validationinterface.h>
+
 CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee,
                                  int64_t _nTime, unsigned int _entryHeight,
                                  bool _spendsCoinbase, int64_t _sigOpsCost, LockPoints lp)
@@ -420,6 +422,10 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason)
         // notification.
         GetMainSignals().TransactionRemovedFromMempool(it->GetSharedTx(), reason, mempool_sequence);
     }
+
+    // ZMCE patch:
+    // Notify on all transactions removed from the mempool with the removal reason.
+    GetMainSignals().TransactionRemovedFromMempoolWithReason(it->GetSharedTx(), reason);
 
     const uint256 hash = it->GetTx().GetHash();
     for (const CTxIn& txin : it->GetTx().vin)

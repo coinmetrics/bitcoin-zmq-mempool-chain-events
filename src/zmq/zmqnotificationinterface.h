@@ -32,6 +32,11 @@ protected:
     void BlockDisconnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexDisconnected) override;
     void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) override;
 
+    void TransactionAddedToMempoolWithFee(const CTransactionRef& tx, const CAmount fee) override;
+    void TransactionRemovedFromMempoolWithReason(const CTransactionRef& ptx, const MemPoolRemovalReason reason) override;
+
+    void TransactionReplacedInMempool(const CTransactionRef& replaced, const CAmount replaced_tx_fee, const CTransactionRef& replacement, const CAmount replacement_tx_fee) override;
+    void HeaderAddedToChain(const CBlockIndex *pindexHeader) override;
 private:
     CZMQNotificationInterface();
 

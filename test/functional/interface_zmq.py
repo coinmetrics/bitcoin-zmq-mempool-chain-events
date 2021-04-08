@@ -159,10 +159,10 @@ class ZMQTest (BitcoinTestFramework):
 
         self.log.info("Test the getzmqnotifications RPC")
         assert_equal(self.nodes[0].getzmqnotifications(), [
-            {"type": "pubhashblock", "address": address, "hwm": 1000},
-            {"type": "pubhashtx", "address": address, "hwm": 1000},
-            {"type": "pubrawblock", "address": address, "hwm": 1000},
-            {"type": "pubrawtx", "address": address, "hwm": 1000},
+            {"type": "pubhashblock", "address": address, "hwm": 100000},
+            {"type": "pubhashtx", "address": address, "hwm": 100000},
+            {"type": "pubrawblock", "address": address, "hwm": 100000},
+            {"type": "pubrawtx", "address": address, "hwm": 100000},
         ])
 
         assert_equal(self.nodes[1].getzmqnotifications(), [])
