@@ -49,7 +49,9 @@ With the /notxdetails/ option JSON response will only contain the transaction ha
 #### Blockheaders
 `GET /rest/headers/<COUNT>/<BLOCK-HASH>.<bin|hex|json>`
 
-Given a block hash: returns <COUNT> amount of blockheaders in upward direction.
+Given a block hash and headers count:
+if <COUNT> is positive, returns <COUNT> blockheaders in upward direction (descendants of the block hash).
+if <COUNT> is negative, returns abs(<COUNT>) blockheaders in downward direction (parents of the block hash).
 Returns empty if the block doesn't exist or it isn't in the active chain.
 
 #### Blockhash by height

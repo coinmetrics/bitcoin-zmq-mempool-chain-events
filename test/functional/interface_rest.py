@@ -278,8 +278,12 @@ class RESTTest (BitcoinTestFramework):
         # See if we can get 5 headers in one response
         self.nodes[1].generate(5)
         self.sync_all()
+        new_bb_hash = self.nodes[0].getbestblockhash()
         json_obj = self.test_rest_request("/headers/5/{}".format(bb_hash))
         assert_equal(len(json_obj), 5)  # now we should have 5 header objects
+
+        json_obj = self.test_rest_request("/headers/-5/{}".format(new_bb_hash))
+        assert_equal(len(json_obj), 5)  # now we should have 5 header objects going backwards too
 
         self.log.info("Test tx inclusion in the /mempool and /block URIs")
 

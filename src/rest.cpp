@@ -169,7 +169,7 @@ static bool rest_headers(const std::any& context,
         return RESTERR(req, HTTP_BAD_REQUEST, "No header count specified. Use /rest/headers/<count>/<hash>.<ext>.");
 
     long count = strtol(path[0].c_str(), nullptr, 10);
-    if (count < 1 || count > 2000)
+    if (count == 0 || count > 2000 || count < -2000)
         return RESTERR(req, HTTP_BAD_REQUEST, "Header count out of range: " + path[0]);
 
     std::string hashStr = path[1];
@@ -179,7 +179,7 @@ static bool rest_headers(const std::any& context,
 
     const CBlockIndex* tip = nullptr;
     std::vector<const CBlockIndex *> headers;
-    headers.reserve(count);
+    headers.reserve(labs(count));
     {
         ChainstateManager& chainman = EnsureAnyChainman(context);
         LOCK(cs_main);
@@ -188,9 +188,13 @@ static bool rest_headers(const std::any& context,
         const CBlockIndex* pindex = chainman.m_blockman.LookupBlockIndex(hash);
         while (pindex != nullptr && active_chain.Contains(pindex)) {
             headers.push_back(pindex);
-            if (headers.size() == (unsigned long)count)
+            if (headers.size() == labs(count))
                 break;
-            pindex = active_chain.Next(pindex);
+            if (count > 0) {
+                pindex = active_chain.Next(pindex);
+            } else {
+                pindex = pindex->pprev;
+            }
         }
     }
 
