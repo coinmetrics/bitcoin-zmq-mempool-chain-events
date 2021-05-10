@@ -165,7 +165,7 @@ static bool rest_headers(const util::Ref& context,
         return RESTERR(req, HTTP_BAD_REQUEST, "No header count specified. Use /rest/headers/<count>/<hash>.<ext>.");
 
     long count = strtol(path[0].c_str(), nullptr, 10);
-    if (count < 1 || count > 2000)
+    if (count == 0 || count > 2000 || count < -2000)
         return RESTERR(req, HTTP_BAD_REQUEST, "Header count out of range: " + path[0]);
 
     std::string hashStr = path[1];
@@ -175,16 +175,20 @@ static bool rest_headers(const util::Ref& context,
 
     const CBlockIndex* tip = nullptr;
     std::vector<const CBlockIndex *> headers;
-    headers.reserve(count);
+    headers.reserve(labs(count));
     {
         LOCK(cs_main);
         tip = ::ChainActive().Tip();
         const CBlockIndex* pindex = LookupBlockIndex(hash);
         while (pindex != nullptr && ::ChainActive().Contains(pindex)) {
             headers.push_back(pindex);
-            if (headers.size() == (unsigned long)count)
+            if (headers.size() == labs(count))
                 break;
-            pindex = ::ChainActive().Next(pindex);
+            if (count > 0) {
+                pindex = ::ChainActive().Next(pindex);
+            } else {
+                pindex = pindex->pprev;
+            }
         }
     }
 
